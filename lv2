@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+struct Cvor{
+    int vrijednost;
+    struct Cvor *next;
+};
+
+
+// clock_t start= clock();
+// clock_t end =clock();
+// double cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// printf("Vrijeme sekvenciajlnog pretrazivanjja: %.6f milisekundi\n", cpu_time_used*1000);
+
+
+int pretraziNiz(int V[], int N, int trazeni) {
+    for (int i = 0; i < N; i++)
+        if (V[i] == trazeni)
+            return i; // vraća indeks
+    return -1; // nije pronađeno
+}
+
+
+
+int pretraziPopis(struct Cvor *glava, int trazeni) {
+    int poz = 0;
+    while (glava != NULL) {
+        if (glava->vrijednost == trazeni)
+            return poz;
+        glava = glava->next;
+        poz++;
+    }
+    return -1;
+}
+
+
+int main()
+{
+    srand(time(NULL));
+    
+    int brojponavljanja=10000000;
+   clock_t startt= clock();  
+    int polje[brojponavljanja];
+    
+   
+    
+    for(int i=0;i<brojponavljanja;i++){
+         polje[i]=rand() % 100;
+         ;
+    }
+    ;  
+    
+    clock_t endd =clock();
+    
+    double cpu_time_usedd = ((double)(endd - startt)) / CLOCKS_PER_SEC;
+    printf("Vrijeme kreiranja i popune polja je: %.6f milisekundi\n", cpu_time_usedd*1000);
+    
+    
+    clock_t mjerenje1 =clock();
+    
+    pretraziNiz(polje, brojponavljanja, 101);
+    
+    clock_t mjerenje2 =clock();
+    
+    
+    double vrijeme1 = ((double)(mjerenje2-mjerenje1)) /CLOCKS_PER_SEC;
+    printf("Vrijeme sekvenciajlnog pretrazivanja niza je: %.6f milisekundi\n",vrijeme1*1000);
+    
+    
+    
+    
+    clock_t start= clock();
+    
+    struct Cvor *glava = NULL, *trenutni = NULL;
+    for (int i = 0; i < brojponavljanja; i++) {
+        struct Cvor *novi = malloc(sizeof(struct Cvor));
+        novi->vrijednost = polje[i];
+        novi->next = NULL;
+
+        if (glava == NULL)
+            glava = novi;
+        else
+            trenutni->next = novi;
+
+        trenutni = novi;
+    }
+    
+    
+    clock_t end =clock();
+    
+ double cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+ printf("Vrijeme kreiranja i popune liste: %.6f milisekundi\n", cpu_time_used*1000);
+ 
+ 
+ 
+ 
+    clock_t mjerenje3 =clock();
+    
+    pretraziPopis(glava, 101);
+    
+    clock_t mjerenje4 =clock();
+    
+    
+    double vrijeme2 = ((double)(mjerenje4-mjerenje3)) /CLOCKS_PER_SEC;
+    printf("Vrijeme sekvenciajlnog pretrazivanja popisa je: %.6f milisekundi\n",vrijeme2*1000);
+ 
+ 
+ 
+}
