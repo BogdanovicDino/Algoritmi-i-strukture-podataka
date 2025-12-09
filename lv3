@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+/* ----------------------------------------------------------
+   Rekurzivna funkcija za binomni koeficijent
+---------------------------------------------------------- */
+long long povrh_rec(int n, int m) {
+    if (m == 0 || m == n)
+        return 1;
+    return povrh_rec(n - 1, m - 1) + povrh_rec(n - 1, m);
+}
+
+/* ----------------------------------------------------------
+   Iterativna funkcija koja simulira rekurziju preko stoga
+---------------------------------------------------------- */
+
+typedef struct {
+    int n, m, phase;
+} Node;
+
+typedef struct {
+    int n, m;
+    long long value;
+} Result;
+
+long long get_result(Result *arr, int size, int n, int m) {
+    for (int i = 0; i < size; i++) {
+        if (arr[i].n == n && arr[i].m == m)
+            return arr[i].value;
+    }
+    return -1; 
+}
+
+void set_result(Result *arr, int *size, int n, int m, long long value) {
+    arr[*size].n = n;
+    arr[*size].m = m;
+    arr[*size].value = value;
+    (*size)++;
+}
+
+long long povrh_stack(int n, int m) {
+    Node stack[10000];
+    int top = -1;
+
+    Result results[10000];
+    int rsize = 0;
+
+    stack[++top] = (Node){n, m, 0};
+
+    while (top >= 0) {
+
+        Node cur = stack[top--];
+        int a = cur.n;
+        int b = cur.m;
+
+        if (get_result(results, rsize, a, b) != -1)
+            continue;
+
+        if (b == 0 || b == a) {
+            set_result(results, &rsize, a, b, 1);
+            continue;
+        }
+
+        if (cur.phase == 0) {
+            stack[++top] = (Node){a, b, 1};
+            stack[++top] = (Node){a - 1, b, 0};
+            stack[++top] = (Node){a - 1, b - 1, 0};
+        } else {
+            long long x = get_result(results, rsize, a - 1, b - 1);
+            long long y = get_result(results, rsize, a - 1, b);
+            set_result(results, &rsize, a, b, x + y);
+        }
+    }
+
+    return get_result(results, rsize, n, m);
+}
+
+/* ----------------------------------------------------------
+   Glavni program
+---------------------------------------------------------- */
+int main() {
+
+    int n;
+    printf("Unesite n (m ce biti n/2): ");
+    scanf("%d", &n);
+
+    int m = n / 2;
+
+    /* -------------------- Rekurzija -------------------- */
+    clock_t start_rec = clock();
+    long long rez_rec = povrh_rec(n, m);
+    clock_t end_rec = clock();
+    double time_rec = (double)(end_rec - start_rec) * 1000.0 / CLOCKS_PER_SEC;
+
+    /* ---------------------- Stog ------------------------ */
+    clock_t start_stack = clock();
+    long long rez_stack = povrh_stack(n, m);
+    clock_t end_stack = clock();
+    double time_stack = (double)(end_stack - start_stack) * 1000.0 / CLOCKS_PER_SEC;
+
+    /* ---------------------- Ispis ----------------------- */
+    printf("\nRezultat (rekurzija): %lld\n", rez_rec);
+    printf("Rezultat (stog):       %lld\n", rez_stack);
+
+    printf("\nRekurzivni algoritam zavrsio je za %.3f milisekundi.\n", time_rec);
+    printf("Algoritam koji koristi stog zavrsio je za %.3f milisekundi.\n", time_stack);
+
+    return 0;
+}
